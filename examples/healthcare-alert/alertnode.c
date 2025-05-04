@@ -1,5 +1,5 @@
 #include "contiki.h"
-#include "net/rime.h"
+#include "net/rime/rime.h"
 #include "random.h"
 #include "sys/etimer.h"
 #include <stdio.h>
