@@ -1,5 +1,5 @@
 #include "contiki.h"
-#include "net/rime/rime.h"
+#include "net/rime.h"
 #include <stdio.h>
 
 PROCESS(sink_node_process, "Alert Sink Node");
