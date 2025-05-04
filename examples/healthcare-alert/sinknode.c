@@ -1,22 +1,40 @@
 #include "contiki.h"
-#include "net/rime/rime.h"
+#include "contiki-net.h"
 #include <stdio.h>
+#include <string.h>
 
-PROCESS(sink_node_process, "Alert Sink Node");
+#define UDP_PORT 1234
+
+static struct uip_udp_conn *udp_conn;
+
+PROCESS(sink_node_process, "Healthcare Sink Node");
 AUTOSTART_PROCESSES(&sink_node_process);
 
-static void recv_callback(struct broadcast_conn *c, const linkaddr_t *from, const uint8_t *data, uint16_t len) {
-  printf("Received ALERT from %02x:%02x: %s\n", from->u8[0], from->u8[1], data);
-}
-
-static const struct broadcast_callbacks bc_callbacks = {recv_callback};
-static struct broadcast_conn bc;
-
-PROCESS_THREAD(sink_node_process, ev, data) {
-  PROCESS_EXITHANDLER(broadcast_close(&bc);)
+PROCESS_THREAD(sink_node_process, ev, data)
+{
   PROCESS_BEGIN();
 
-  broadcast_open(&bc, 129, &bc_callbacks);
+  printf("Sink node started, listening on port %d\n", UDP_PORT);
+
+  // Create a new UDP connection bound to the listening port
+  udp_conn = udp_new(NULL, UIP_HTONS(UDP_PORT), NULL);
+  udp_bind(udp_conn, UIP_HTONS(UDP_PORT));
+
+  while(1) {
+    PROCESS_YIELD();
+
+    if(ev == tcpip_event) {
+      if(uip_newdata()) {
+        char *received_data = (char *)uip_appdata;
+        int len = uip_datalen();
+        char msg[len + 1];
+        memcpy(msg, received_data, len);
+        msg[len] = '\0';
+
+        printf("⚠️ Alert received: %s\n", msg);
+      }
+    }
+  }
 
   PROCESS_END();
 }
