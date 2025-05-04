@@ -1,4 +1,4 @@
-CONTIKI = ../../..
+CONTIKI = ../..
 TARGET = sky
 
 all: sink_node alert_node
