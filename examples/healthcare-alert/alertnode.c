@@ -1,8 +1,10 @@
 #include "contiki.h"
-#include "net/rime/rime.h"
+#include "net/rime.h"
 #include "random.h"
 #include "sys/etimer.h"
 #include <stdio.h>
+
+// #include "net/rime/rime.h"
 
 #define TEMP_THRESHOLD 38
 #define HEART_THRESHOLD 100
