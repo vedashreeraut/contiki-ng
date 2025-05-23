@@ -1,8 +1,9 @@
-//test change
+
 #include "contiki.h"
 #include "contiki-net.h"
 #include "dev/leds.h"
 #include <stdio.h>
+//vapis 
 #include <string.h>
 
 #define UDP_PORT 1234
@@ -14,6 +15,8 @@ AUTOSTART_PROCESSES(&sink_node_process);
 
 PROCESS_THREAD(sink_node_process, ev, data)
 {
+  static struct etimer timer;
+
   PROCESS_BEGIN();
 
   printf("Sink node started, listening on port %d\n", UDP_PORT);
@@ -24,15 +27,21 @@ PROCESS_THREAD(sink_node_process, ev, data)
   while(1) {
     PROCESS_YIELD();
 
-    if(ev == tcpip_event && uip_newdata()) {
-      char *received_data = (char *)uip_appdata;
-      int len = uip_datalen();
-      char msg[len + 1];
-      memcpy(msg, received_data, len);
-      msg[len] = '\0';
+    if(ev == tcpip_event) {
+      if(uip_newdata()) {
+        char *received_data = (char *)uip_appdata;
+        int len = uip_datalen();
+        char msg[len + 1];
+        memcpy(msg, received_data, len);
+        msg[len] = '\0';
 
-      leds_on(LEDS_GREEN);
-      printf("✅ Received alert: %s\n", msg);
+        printf("⚠️  Received alert: %s\n", msg);
+
+        leds_on(LEDS_GREEN);
+        etimer_set(&timer, CLOCK_SECOND / 2);
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+        leds_off(LEDS_GREEN);
+      }
     }
   }
 
