@@ -1,5 +1,7 @@
+
 #include "contiki.h"
 #include "contiki-net.h"
+#include "dev/leds.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -16,23 +18,21 @@ PROCESS_THREAD(sink_node_process, ev, data)
 
   printf("Sink node started, listening on port %d\n", UDP_PORT);
 
-  // Create a new UDP connection bound to the listening port
   udp_conn = udp_new(NULL, UIP_HTONS(UDP_PORT), NULL);
   udp_bind(udp_conn, UIP_HTONS(UDP_PORT));
 
   while(1) {
     PROCESS_YIELD();
 
-    if(ev == tcpip_event) {
-      if(uip_newdata()) {
-        char *received_data = (char *)uip_appdata;
-        int len = uip_datalen();
-        char msg[len + 1];
-        memcpy(msg, received_data, len);
-        msg[len] = '\0';
+    if(ev == tcpip_event && uip_newdata()) {
+      char *received_data = (char *)uip_appdata;
+      int len = uip_datalen();
+      char msg[len + 1];
+      memcpy(msg, received_data, len);
+      msg[len] = '\0';
 
-        printf("⚠️ Alert received: %s\n", msg);
-      }
+      leds_on(LEDS_GREEN);
+      printf("✅ Received alert: %s\n", msg);
     }
   }
 
