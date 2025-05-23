@@ -28,20 +28,20 @@ PROCESS_THREAD(sink_node_process, ev, data)
     PROCESS_YIELD();
 
     if(ev == tcpip_event) {
-      if(uip_newdata()) {
-        char *received_data = (char *)uip_appdata;
-        int len = uip_datalen();
-        char msg[len + 1];
-        memcpy(msg, received_data, len);
-        msg[len] = '\0';
+      iif(uip_newdata()) {
+  char msg[150];
+  memset(msg, 0, sizeof(msg));
+  strncpy(msg, (char *)uip_appdata, uip_datalen() > 149 ? 149 : uip_datalen());
+  msg[149] = '\\0';
 
-        printf("⚠️  Received alert: %s\n", msg);
+  printf("⚠️  Received alert: %s\\n", msg);
 
-        leds_on(LEDS_GREEN);
-        etimer_set(&timer, CLOCK_SECOND / 2);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
-        leds_off(LEDS_GREEN);
-      }
+  leds_on(LEDS_GREEN);
+  etimer_set(&timer, CLOCK_SECOND / 2);
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+  leds_off(LEDS_GREEN);
+}
+
     }
   }
 
