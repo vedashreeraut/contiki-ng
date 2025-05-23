@@ -28,19 +28,20 @@ PROCESS_THREAD(sink_node_process, ev, data)
     PROCESS_YIELD();
 
     if(ev == tcpip_event) {
-      iif(uip_newdata()) {
+      if(uip_newdata()) {
   char msg[150];
   memset(msg, 0, sizeof(msg));
   strncpy(msg, (char *)uip_appdata, uip_datalen() > 149 ? 149 : uip_datalen());
-  msg[149] = '\\0';
+  msg[149] = '\0'; // correct null termination
 
-  printf("⚠️  Received alert: %s\\n", msg);
+  printf("⚠️  Received alert: %s\n", msg);
 
+  // Blink green LED
   leds_on(LEDS_GREEN);
-  etimer_set(&timer, CLOCK_SECOND / 2);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+  clock_delay_usec(500000);  // delay ~0.5 seconds
   leds_off(LEDS_GREEN);
 }
+
 
     }
   }
